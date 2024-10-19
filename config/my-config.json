@@ -1,0 +1,5 @@
+{
+	"apiUrl": "https://your-api-endpoint.com",
+	"jsonFilePath": "./data.json",
+	"schedule": "* * * * *"
+}
