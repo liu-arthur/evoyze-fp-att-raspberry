@@ -1,4 +1,4 @@
-# My Scheduler Application
+# FAST People Attendance x Raspberry Pi Scheduler Application
 
 This Node.js application is designed to send JSON data to a FAST People Attendance API endpoint on a scheduled basis and notify a server of this device's online status. It also allows for immediate execution of the JSON sending functionality via command-line parameters.
 
@@ -13,7 +13,7 @@ This Node.js application is designed to send JSON data to a FAST People Attendan
 ## Directory Structure
 
 ```
-/my-scheduler
+/scheduler
 ├── app
 │   ├── scheduler.js       # Main application script
 │   └── tools
