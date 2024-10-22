@@ -8,7 +8,8 @@
 	},
 	"scripts": {
 		"start": "node ./app/app.js",
-		"build": "node ./build-tools/build.js"
+		"build": "node ./mgnt_tools/build-app.js",
+		"myIP": "node ./mgnt_tools/localIP.js"
 	},
 	"pkg": {
 		"targets": [
