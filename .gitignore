@@ -1,3 +1,20 @@
-/build/
-/node_modules/
-/mgnt_tools/
+# Node modules
+node_modules/
+
+# Logs
+logs/
+log/
+*.log
+
+# Environment variables
+.env
+
+# Build directories
+dist/
+build/
+
+# Config
+config/
+
+# Management tools
+mgt/

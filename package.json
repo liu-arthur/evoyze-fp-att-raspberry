@@ -1,15 +1,17 @@
 {
 	"name": "att-data-scheduler",
-	"version": "1.0.0",
+	"version": "24.10.4",
 	"description": "Upload attendance data to FAST People",
 	"main": "app.js",
+	"author": "eVoyze Sdn Bhd",
+	"license": "MIT",
 	"bin": {
 		"main": "./app/app.js"
 	},
 	"scripts": {
 		"start": "node ./app/app.js",
-		"build": "node ./mgnt_tools/build-app.js",
-		"myIP": "node ./mgnt_tools/localIP.js"
+		"build": "node ./mgt/build-app.js",
+		"myIP": "node ./mgt/localIP.js"
 	},
 	"pkg": {
 		"targets": [
@@ -17,8 +19,6 @@
 		]
 	},
 	"keywords": [],
-	"author": "",
-	"license": "ISC",
 	"dependencies": {
 		"@node-minify/core": "^8.0.6",
 		"@node-minify/uglify-es": "^8.0.6",
