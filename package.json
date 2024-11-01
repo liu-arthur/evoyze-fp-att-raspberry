@@ -10,6 +10,7 @@
 	},
 	"scripts": {
 		"start": "node ./app/app.js",
+		"dev": "nodemon ./app/app.js",
 		"build": "node ./mgt/build-app.js",
 		"myIP": "node ./mgt/localIP.js"
 	},

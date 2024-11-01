@@ -18,3 +18,8 @@ config/
 
 # Management tools
 mgt/
+
+# RPi doc
+raspberry-pi/attendance_log/
+raspberry-pi/embeddings/
+raspberry-pi/sys_log/

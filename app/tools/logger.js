@@ -12,7 +12,7 @@ if (!fs.existsSync(logDir)) {
 
 // Create a transport for daily rotating logs
 const transport = new (require("winston-daily-rotate-file"))({
-	filename: path.join(logDir, "log_%DD%MM%YYYY.log"), // Log file naming format
+	filename: path.join(logDir, "log"), // Log file naming format
 	datePattern: "DDMMYYYY", // Date format for the log files
 	zippedArchive: true, // Compress old log files
 	frequency: "24h", // Rotate logs every 24 hours
@@ -24,7 +24,13 @@ const transport = new (require("winston-daily-rotate-file"))({
 // Custom format to log messages
 const customFormat = winston.format.printf(({ level, message, timestamp }) => {
 	const date = new Date(timestamp);
-	const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+	const formattedDate = `${String(date.getDate()).padStart(2, "0")}-${String(
+		date.getMonth() + 1
+	).padStart(2, "0")}-${date.getFullYear()} ${String(
+		date.getHours()
+	).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}:${String(
+		date.getSeconds()
+	).padStart(2, "0")}`;
 
 	return `${formattedDate} : ${message}`; // Custom output format
 });

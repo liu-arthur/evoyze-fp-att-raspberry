@@ -64,136 +64,141 @@ const apiBase = apiUrl.endsWith("/") ? apiUrl : `${apiUrl}/`;
  * If the API response is "ok", the JSON file is deleted.
  */
 const sendJsonToApi = async () => {
-	const apiEndpoint = `${apiBase}att-log`; // Construct the API endpoint for notifying online status
-	const localIP = getLocalIP(); // Get the local IP address of the device
+    const apiEndpoint = `${apiBase}att-log`; // Construct the API endpoint for notifying online status
+    const localIP = getLocalIP(); // Get the local IP address of the device
 
-	// Define the path to the attendance JSON file
-	const attendanceFilePath = path.join(process.cwd(), "attendance.json"); // Path to attendance.json
+    // Define the path to the attendance JSON file
+    const attendanceFilePath = path.join(process.cwd(), jsonFilePath); // Path to attendance.json
 
-	// Check if the attendance JSON file exists
-	if (!fs.existsSync(attendanceFilePath)) {
-		logMessage(
-			"Error: attendance.json file does not exist. Ending process."
-		); // Log error message
-		process.exit(1); // Exit the process with a failure code
-	}
+    // Check if the attendance JSON file exists
+    if (!fs.existsSync(attendanceFilePath)) {
+        logMessage("Error: attendance.json file does not exist. Ending process."); // Log error message
+        process.exit(1); // Exit the process with a failure code
+    }
 
-	// Load attendance data from the JSON file
-	let attendanceData;
-	try {
-		const fileContent = fs.readFileSync(attendanceFilePath, "utf8"); // Read the file content
-		attendanceData = JSON.parse(fileContent); // Parse the JSON content
-	} catch (error) {
-		logMessage("Error reading attendance JSON file: " + error.message); // Log error if reading fails
-		process.exit(1); // Exit the process with a failure code
-	}
+    // Load attendance data from the JSON file
+    let attendanceData;
+    try {
+        const fileContent = fs.readFileSync(attendanceFilePath, "utf8"); // Read the file content
+        attendanceData = JSON.parse(fileContent); // Parse the JSON content
+    } catch (error) {
+        logMessage("Error reading attendance JSON file: " + error.message); // Log error if reading fails
+        process.exit(1); // Exit the process with a failure code
+    }
 
-	// Create the request body with necessary device information
-	const body = JSON.stringify({
-		dev_group: dev_group, // Get from config
-		dev_passcode: dev_passcode, // Get from config
-		dev_id: dev_id, // Get from config
-		ip_addr: localIP, // Use the local IP address here
+    // Create the request body with necessary device information
+    const body = JSON.stringify({
+        dev_group: dev_group, // Get from config
+        dev_passcode: dev_passcode, // Get from config
+        dev_id: dev_id, // Get from config
+        ip_addr: localIP, // Use the local IP address here
         dev_log: attendanceData, // Include attendance data in dev_log
-	});
+    });
 
-	try {
-		// Set up the options for the HTTP/HTTPS request
-		const options = {
-			hostname: new URL(apiEndpoint).hostname, // Extract the hostname from the API endpoint
-			path: new URL(apiEndpoint).pathname, // Extract the pathname from the API endpoint
-			method: "POST", // HTTP method to use
-			headers: {
-				Authorization: apiKey, // Include authorization key from config
-				"Content-Type": "application/json", // Specify content type as JSON
-				"Content-Length": Buffer.byteLength(body), // Set the content length based on the request body
-			},
-		};
+    // Set up the options for the HTTP/HTTPS request
+    const url = new URL(apiEndpoint);
+    const options = {
+        hostname: url.hostname,
+        path: url.pathname,
+        method: "POST",
+        headers: {
+            Authorization: apiKey, // Include authorization key from config
+            "Content-Type": "application/json", // Specify content type as JSON
+            "Content-Length": Buffer.byteLength(body), // Set the content length based on the request body
+        },
+    };
 
-		const req = (apiEndpoint.startsWith("https:") ? https : http).request(
-			options,
-			(res) => {
-				let responseData = "";
+    const req = (url.protocol === "https:" ? https : http).request(options, (res) => {
+        let responseData = "";
 
-				res.on("data", (chunk) => {
-					responseData += chunk;
-				});
+        res.on("data", (chunk) => {
+            responseData += chunk; // Accumulate response data
+        });
 
-				res.on("end", () => {
-					if (responseData.msg === "ok") {
-						logMessage(
-							"Data sent successfully, deleting the JSON file..."
-						);
-						fs.unlinkSync(jsonFilePath);
-						logMessage("JSON file deleted successfully.");                        
-						logMessage('Processed: ' + responseData.processedCount);
-					} else {
-						logMessage('Response was not "ok": ' + responseData.msg);
-					}
-				});
-			}
-		);
+        res.on("end", () => {
+            try {
+                const jsonResponse = JSON.parse(responseData); // Parse the JSON response
+                if (jsonResponse.msg === "ok") {
+                    logMessage("Data sent successfully, deleting the JSON file...");
+                    fs.unlinkSync(attendanceFilePath); // Delete the JSON file
+                    logMessage("JSON file deleted successfully.");
+                    logMessage("Processed: " + jsonResponse.processedCount);
+                } else {
+                    logMessage('Response was not "ok": ' + jsonResponse.msg);
+                }
+            } catch (err) {
+                logMessage("Failed to parse server response: " + responseData);
+            }
+        });
+    });
 
-		req.on("error", (error) => {
-			logMessage("Error sending data: " + error.message);
-		});
+    req.on("error", (error) => {
+        logMessage("Error sending data: " + error.message);
+    });
 
-		req.end();
-	} catch (error) {
-		logMessage("Error reading JSON file: " + error.message);
-	}
+    // Log and send the request body
+    logMessage("Sending JSON to the server...");
+    req.write(body); // Write the body to the request
+    req.end(); // End the request
 };
+
 
 /**
  * Notifies the server that this device is online.
  * Sends a POST request with device information to the specified API endpoint.
  */
 const notifyServerOnline = async () => {
-	const apiEndpoint = `${apiBase}att-dev`; // Construct the API endpoint for notifying online status
-	const localIP = getLocalIP(); // Get the local IP address of the device
+    const apiEndpoint = `${apiBase}att-dev`; // Construct the API endpoint for notifying online status
+    const localIP = getLocalIP(); // Get the local IP address of the device
 
-	// Create the request body with necessary device information
-	const body = JSON.stringify({
-		dev_group: dev_group, // Get from config
-		dev_passcode: dev_passcode, // Get from config
-		dev_id: dev_id, // Get from config
-		ip_addr: localIP, // Use the local IP address here
-		dev_log: [], // Remain as an empty array
-	});
+    // Create the request body with necessary device information
+    const body = JSON.stringify({
+        dev_group: dev_group, // Get from config
+        dev_passcode: dev_passcode, // Get from config
+        dev_id: dev_id, // Get from config
+        ip_addr: localIP, // Use the local IP address here
+        dev_log: [], // Remain as an empty array
+    });
 
-	// Set up the options for the HTTP/HTTPS request
-	const options = {
-		hostname: new URL(apiEndpoint).hostname, // Extract the hostname from the API endpoint
-		path: new URL(apiEndpoint).pathname, // Extract the pathname from the API endpoint
-		method: "POST", // HTTP method to use
-		headers: {
-			Authorization: apiKey, // Include authorization key from config
-			"Content-Type": "application/json", // Specify content type as JSON
-			"Content-Length": Buffer.byteLength(body), // Set the content length based on the request body
-		},
-	};
+    // Set up the options for the HTTP/HTTPS request
+    const url = new URL(apiEndpoint);
+    const options = {
+        hostname: url.hostname,
+        path: url.pathname,
+        method: "POST",
+        headers: {
+            Authorization: apiKey, // Include authorization key from config
+            "Content-Type": "application/json",
+            "Content-Length": Buffer.byteLength(body),
+        },
+    };
 
-	// Use the appropriate request module based on the API endpoint's protocol
-	const req = (apiEndpoint.startsWith("https") ? https : http).request(
-		options,
-		(res) => {
-			let responseData = ""; // Variable to accumulate response data
+    // Use the appropriate request module based on the API endpoint's protocol
+    const req = (url.protocol === "https:" ? https : http).request(options, (res) => {
+        let responseData = "";
 
-			res.on("data", (chunk) => {
-				responseData += chunk; // Append incoming data chunks to responseData
-			});
+        res.on("data", (chunk) => {
+            responseData += chunk; // Append incoming data chunks to responseData
+        });
 
-			res.on("end", () => {
-				logMessage("Server notified of online status: " + responseData.msg); // Log the server's response
-			});
-		}
-	);
+        res.on("end", () => {
+            try {
+                const jsonResponse = JSON.parse(responseData);
+                console.log("Server notified of online status: ", jsonResponse.msg);
+            } catch (err) {
+                console.error("Failed to parse response: ", responseData);
+            }
+        });
+    });
 
-	req.on("error", (error) => {
-		logMessage("Error notifying server online: " + error.message); // Log any errors during notification
-	});
+    req.on("error", (error) => {
+        console.error("Error notifying server online: " + error.message);
+    });
 
-	req.end(); // End the request
+    // Log and send the request body
+    console.log("Sending notification to server...");
+    req.write(body); // Write the body to the request
+    req.end(); // End the request
 };
 
 // Check for existing lock file to see if the application is already running

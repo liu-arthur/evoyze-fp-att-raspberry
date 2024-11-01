@@ -1,8 +1,8 @@
 {
 	"apiUrl": "https://your-api-endpoint.com",
 	"apiKey": "eVoyze 8f2463117a0b4e1b957bec43e13a7bba3b7ce4d948bd483f9f931b64d580db9a",
-	"jsonFilePath": "./data.json",
-	"schedule": "* * * * *",
+	"jsonFilePath": "./raspberry-pi/attendance_log/attendance.json",
+	"schedule": "*/15 * * * *",
 
 	"dev_group": "OFFICE1",
 	"dev_passcode": "123456",
